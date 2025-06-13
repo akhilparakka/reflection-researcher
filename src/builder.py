@@ -133,7 +133,6 @@ async def human_feedback(state: ReportState, config: RunnableConfig) -> Command[
                         \n\n{sections_str}\n
                         \nDoes the report plan meet your needs?\nPass 'true' to approve the report plan.\nOr, provide feedback to regenerate the report plan:"""
     feedback = interrupt(interrupt_message)
-    print(feedback, "FEEEEEEEEEEEEEEEDDDDDDDDD")
     if (isinstance(feedback, bool) and feedback is True) or (isinstance(feedback, str) and feedback.lower() == "true"):
         return Command(goto=[
             Send("build_section_with_web_research", {"messages": messages, "section": s, "search_iterations": 0})
