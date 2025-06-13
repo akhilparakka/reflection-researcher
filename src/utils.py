@@ -292,7 +292,6 @@ async def tavily_search(
 
 
     if unique_results:
-        print(formatted_output, "111111111111111111111111111")
         return formatted_output
     else:
         return "No valid search results found. Please try different search queries or use a different search API."

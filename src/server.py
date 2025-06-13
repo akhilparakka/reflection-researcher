@@ -53,24 +53,17 @@ async def _astream_report_generator(
     Yields:
         Formatted event strings containing message chunks, tool calls, section completions, or interrupts.
     """
-    # Convert the input message to a HumanMessage
     messages = [HumanMessage(content=message)]
 
     input_ = {
         "messages": messages,
         "already_clarified_topic": already_clarified_topic,
-        "feedback_on_report_plan": [],
-        "sections": [],
-        "completed_sections": [],
-        "report_sections_from_research": "",
-        "final_report": "",
-        "source_str": "",
     }
 
-    # Handle interrupt feedback with Command(resume=...)
-    if not auto_accept_plan and interrupt_feedback:
-        resume_msg = f"[{interrupt_feedback}] {message}"
-        print(interrupt_feedback, "Checkkk")
+    if interrupt_feedback:
+        "Im inside the If condition"
+        resume_msg = interrupt_feedback
+
         input_ = Command(resume=resume_msg)
 
     async for agent, _, event_data in workflow.astream(
@@ -84,29 +77,9 @@ async def _astream_report_generator(
         subgraphs=True,
     ):
         if isinstance(event_data, dict):
-            # Handle interrupts (e.g., from clarify_with_user or human_feedback)
             if "__interrupt__" in event_data:
                 interrupt_data = event_data["__interrupt__"][0]
                 content = interrupt_data.value if hasattr(interrupt_data, "value") else ""
-                agent_name = agent[0].split(":")[0] if agent else "unknown"
-                options = []
-                if agent_name == "clarify_with_user":
-                    # Try to parse content as JSON for ClarifyWithUser
-                    try:
-                        parsed = json.loads(content)
-                        if isinstance(parsed, dict) and "question" in parsed:
-                            content = parsed["question"]
-                    except json.JSONDecodeError:
-                        pass
-                    options = [
-                        {"text": "Provide clarification", "value": "clarify"},
-                        {"text": "Proceed with report", "value": "proceed"},
-                    ]
-                elif agent_name == "human_feedback":
-                    options = [
-                        {"text": "Approve plan", "value": "true"},
-                        {"text": "Provide feedback", "value": "feedback"},
-                    ]
                 yield _make_event(
                     "interrupt",
                     {
@@ -115,7 +88,6 @@ async def _astream_report_generator(
                         "role": "assistant",
                         "content": content,
                         "finish_reason": "interrupt",
-                        "options": options,
                     },
                 )
             # Handle section completions
@@ -145,11 +117,9 @@ async def _astream_report_generator(
             "content": message_chunk.content,
         }
 
-        # Handle finish reason
         if message_chunk.response_metadata.get("finish_reason"):
             event_stream_message["finish_reason"] = message_chunk.response_metadata.get("finish_reason")
 
-        # Handle tool messages
         if isinstance(message_chunk, ToolMessage):
             event_stream_message["tool_call_id"] = message_chunk.tool_call_id
             yield _make_event("tool_call_result", event_stream_message)

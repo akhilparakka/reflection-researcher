@@ -40,12 +40,16 @@ async def clarify_with_user(state: ReportState, config: RunnableConfig):
         SystemMessage(content=system_instructions),
         HumanMessage(content="Generate clarification questions that will help with planning the sections of the report.")
     ])
-
+    print("Here?")
     clarification = interrupt(results.question)
+    if (isinstance(clarification, bool) and clarification is True) or (isinstance(clarification, str) and clarification.lower() == "true"):
+        print("IM HEREEEEEEE")
+        updated_messages = messages + [HumanMessage(content=str(clarification))]
+        return Command(goto=[
+            Send("generate_report_plan", {"messages": updated_messages})
+        ])
 
-    updated_messages = messages + [HumanMessage(content=str(clarification))]
 
-    return {"messages": updated_messages, "already_clarified_topic": True}
 
 async def generate_report_plan(state: ReportState, config: RunnableConfig) -> Command[Literal["human_feedback","build_section_with_web_research"]]:
     messages = state["messages"]
@@ -129,6 +133,7 @@ async def human_feedback(state: ReportState, config: RunnableConfig) -> Command[
                         \n\n{sections_str}\n
                         \nDoes the report plan meet your needs?\nPass 'true' to approve the report plan.\nOr, provide feedback to regenerate the report plan:"""
     feedback = interrupt(interrupt_message)
+    print(feedback, "FEEEEEEEEEEEEEEEDDDDDDDDD")
     if (isinstance(feedback, bool) and feedback is True) or (isinstance(feedback, str) and feedback.lower() == "true"):
         return Command(goto=[
             Send("build_section_with_web_research", {"messages": messages, "section": s, "search_iterations": 0})
