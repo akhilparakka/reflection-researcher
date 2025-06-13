@@ -1,0 +1,8 @@
+{
+  "dockerfile_lines": [],
+  "graphs": {
+    "agent": "./src/builder.py:workflow"
+  },
+  "env": "./.env",
+  "dependencies": ["."]
+}
