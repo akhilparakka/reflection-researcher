@@ -40,14 +40,17 @@ async def clarify_with_user(state: ReportState, config: RunnableConfig):
         SystemMessage(content=system_instructions),
         HumanMessage(content="Generate clarification questions that will help with planning the sections of the report.")
     ])
-    print("Here?")
     clarification = interrupt(results.question)
     if (isinstance(clarification, bool) and clarification is True) or (isinstance(clarification, str) and clarification.lower() == "true"):
-        print("IM HEREEEEEEE")
         updated_messages = messages + [HumanMessage(content=str(clarification))]
         return Command(goto=[
             Send("generate_report_plan", {"messages": updated_messages})
         ])
+    elif isinstance(clarification, str):
+        updated_messages = messages + [HumanMessage(content=clarification)]
+        return Command(goto="generate_report_plan", update={"messages": updated_messages, "already_clarified_topic": True})
+    else:
+        return Command(goto="generate_report_plan", update={"already_clarified_topic": True})
 
 
 
@@ -60,8 +63,8 @@ async def generate_report_plan(state: ReportState, config: RunnableConfig) -> Co
     report_structure = configurable.report_structure
     number_of_queries = configurable.number_of_queries
     search_api = get_config_value(configurable.search_api)
-    search_api_config = configurable.search_api_config or {}  # Get the config dict, default to empty
-    params_to_pass = get_search_params(search_api, search_api_config)  # Filter parameters
+    search_api_config = configurable.search_api_config or {}
+    params_to_pass = get_search_params(search_api, search_api_config)
     sections_user_approval = configurable.sections_user_approval
 
     if isinstance(report_structure, dict):
