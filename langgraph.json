@@ -4,5 +4,6 @@
     "agent": "./src/builder.py:workflow"
   },
   "env": "./.env",
-  "dependencies": ["."]
+  "dependencies": ["."],
+  "image_distro": "wolfi"
 }
