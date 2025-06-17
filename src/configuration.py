@@ -40,7 +40,7 @@ class WorkflowConfiguration:
     summarization_model_provider: str = "openai"
     summarization_model: str = "gpt-4o"
     max_structured_output_retries: int = 3
-    include_source_str: bool = False
+    include_source_str: bool = True
 
     # Workflow-specific configuration
     number_of_queries: int = 2 # Number of search queries to generate per iteration

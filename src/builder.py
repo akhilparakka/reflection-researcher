@@ -316,3 +316,4 @@ builder.add_edge("compile_final_report", END)
 
 memory = MemorySaver()
 workflow = builder.compile(checkpointer=memory)
+# workflow = builder.compile()
