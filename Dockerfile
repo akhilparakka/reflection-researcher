@@ -1,4 +1,4 @@
-FROM langchain/langgraph-api:3.11-wolfi
+FROM langchain/langgraph-api:3.11
 
 
 
